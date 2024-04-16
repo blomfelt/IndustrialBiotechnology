@@ -1,18 +1,19 @@
 clc
 clear
+close all
 
-%global  Fin_l, Fin_g, V_gas_initial, V_initial, yco2_in, S0, mu_max, kLa, Ks, yo2_in, He, Yxs, Yos, Ycs, Ysx, P, T, R
- t= linspace(0, 36, 1000); % h
+global Fin_l Fin_g V_gas_initial V_initial ...
+       yo2_in yco2_in He P T R...
+       S0 mu_max kLa Ks ...
+       Yxs Yos Ycs Ysx
+
+    t= [0 36]; %h, may also use: linspace(0, 36, 1000);
+    
     V_initial=0.5; % L
     V_gas_initial= 9.5; %L
     
     Fin_l=0.2; % L/h
     Fin_g=60;   % L/h
-
-    VL=V_initial+Fin_l*t;
-    VG=V_gas_initial+Fin_g*t;
-    
-
     
     S0= 25; % g/L
     Si=5;   % g/L
@@ -38,10 +39,8 @@ clear
     
     
     starting_conditions= [Xi, Si, ci_o2, yo2_in, yco2_in];
-    
 
-    
-    [t, y]=ode15s(@(t,y)B4_fun(t, y, VG, VL, Fin_l, Fin_g, V_gas_initial, V_initial, yco2_in, S0, mu_max, kLa, Ks, yo2_in, He, Yxs, Yos, Ycs, Ysx, P, T, R), t, starting_conditions);
+    [t, y]=ode15s(@(t,y)B4_fun(t, y), t, starting_conditions);
     
     
     X= y(:,1);
@@ -50,8 +49,20 @@ clear
     y_o2g= y(:,4);
     y_co2g= y(:,5);
     
-    
-    plot(t,X)
-    
-    
+
+fontScaling = 1.2;
+plot(t,X, ...
+    t, S)
+title("Concentration of X and S")
+legend("X", "S")
+fontsize(gcf, scale=fontScaling)
+
+gasPlot = [c_o2, y_o2g, y_co2g];
+gasNames = ["c(O2)", "y(O2)", "y(CO2)"];
+for i = 1:size(gasPlot, 2)
+    figure()
+    plot(t, gasPlot(:,i))
+    title(gasNames(i))
+    fontsize(gcf, scale=fontScaling)
+end
 
