@@ -13,7 +13,7 @@ global Fin_l Fin_g V_gas_initial V_initial ...
 
 
     VL=V_initial+Fin_l*t;
-    VG=V_gas_initial+Fin_g*t;
+    VG=V_gas_initial+Fin_l*t;
 
 if VL>=10
     Fin_l=0;
