@@ -49,20 +49,33 @@ global Fin_l Fin_g V_gas_initial V_initial ...
     c_o2= y(:,3);
     y_o2g= y(:,4);
     y_co2g= y(:,5);
-    
+
 subplot(2, 2, 1)
 fontScaling = 1.2;
 plot(t,X, ...
     t, S)
 title("Concentration of X and S")
 legend("X", "S")
+ylabel("c [g/L]")
 %fontsize(gcf, scale=fontScaling)
 
-gasPlot = [c_o2, y_o2g, y_co2g];
-gasNames = ["c(O2)", "y(O2)", "y(CO2)"];
-for i = 1:size(gasPlot, 2)
-    subplot(2, 2, i+1)%figure()
-    plot(t, gasPlot(:,i))
-    title(gasNames(i))
-end
+subplot(2, 2, 2)
+plot(t, c_o2*1e6)
+ylabel("c(O2) [µ mol]")
+fontsize(gcf, scale=fontScaling)
+
+subplot(2, 2, 3)
+plot(t, y_o2g, t, y_co2g)
+title("Molar fractions of O2 and CO2")
+legend("y(O2)", "y(CO2)")
+fontsize(gcf, scale=fontScaling)
+
+
+V_plot = V_initial+Fin_l*t;
+V_gas_plot=V_gas_initial-Fin_l*t;
+V_total_plot = V_plot+V_gas_plot;
+subplot(2, 2, 4)
+plot(t, V_plot, t, V_gas_plot)
+ylabel("Volume [L]")
+legend("Liquid Volume", "Gas Volume")
 fontsize(gcf, scale=fontScaling)
