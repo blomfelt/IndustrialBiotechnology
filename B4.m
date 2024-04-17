@@ -38,6 +38,7 @@ global Fin_l Fin_g V_gas_initial V_initial ...
     R=0.08206; % atm*L/mol*K
     
     
+    
     starting_conditions= [Xi, Si, ci_o2, yo2_in, yco2_in];
 
     [t, y]=ode15s(@(t,y)B4_fun(t, y), t, starting_conditions);
