@@ -50,20 +50,19 @@ global Fin_l Fin_g V_gas_initial V_initial ...
     y_o2g= y(:,4);
     y_co2g= y(:,5);
     
-
+subplot(2, 2, 1)
 fontScaling = 1.2;
 plot(t,X, ...
     t, S)
 title("Concentration of X and S")
 legend("X", "S")
-fontsize(gcf, scale=fontScaling)
+%fontsize(gcf, scale=fontScaling)
 
 gasPlot = [c_o2, y_o2g, y_co2g];
 gasNames = ["c(O2)", "y(O2)", "y(CO2)"];
 for i = 1:size(gasPlot, 2)
-    figure()
+    subplot(2, 2, i+1)%figure()
     plot(t, gasPlot(:,i))
     title(gasNames(i))
-    fontsize(gcf, scale=fontScaling)
 end
-
+fontsize(gcf, scale=fontScaling)
