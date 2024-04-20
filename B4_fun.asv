@@ -13,16 +13,17 @@ global Fin_l Fin_g V_gas_initial V_initial ...
 
 
     VL=V_initial+Fin_l*t;
-    VG=V_gas_initial+Fin_g*t;
+    VG=V_gas_initial-Fin_l*t;
 
-if VL>=10
+if VL>10
+    V = 10;
     Fin_l=0;
     Fin_g=0;
 end
 
 
     mu=mu_max*S/(Ks+S);
-    q_o2=kLa*(yo2_in-yo2)/(VL*X);
+    q_o2=kLa*(yo2_in-yo2)/(VL*X); %-Yos/Yxs*mu;
    % q_co2=-kLa*(yo2_in-yo2)/(VL*X); OLD
     q_co2= Ycs/Yxs*mu;
 
