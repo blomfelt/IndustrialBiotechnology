@@ -2,7 +2,16 @@ clc
 clear
 close all
 
-%% Kinetic parameters and rate equations
+global Fin_l Fin_g V_g_i V_l_i ...
+       yo2_in yco2_in ci_o2 He P T R...
+       S0 mu_max kLa Ks Yxs Yos Ycs Ysx ...
+       S_ec G ATP X Pyr CO2 cO2_L E...
+       S_eci Gi ATP_i Xi Pyr_i yco2_in yo2_in Ei...
+       q1_max q2_max q3_max q4_max q5_max q6_max q7_max...
+       K_1Sec g21 g71 gamma71 gamma21 K_2G K_2ATP K_3IATP K_3G K_3ATP...
+       K_4Pyr K_4O2 K_4ISec K_5Pyr K_6E   K_6O2  K_6ISec K_7E   K_7ATP K_7ISec
+
+% Kinetic parameters and rate equations
 
 %R1 Glucose uptake
 q1_max = 14; %mmol/gDW/h
@@ -25,8 +34,8 @@ K_3IATP = 1; %mM intracell.
 
 %R4 Respiration of pyruvate
 q4_max = 10; %mmol/gDW/h
-K_4Pyr = 0.2; %mM intracell.
-K_4O2 = 0.02; %mM
+K_4Pyr   = 0.2; %mM intracell.
+K_4O2   = 0.02; %mM
 K_4ISec = 1; %mM 
 
 %5 Fermentation
@@ -35,8 +44,8 @@ K_5Pyr = 5;  %mM intracell.
 
 %6 Respiration of ethanol and glyoxylate shunt
 q6_max = 6; %mmol/gDW/h
-K_6E = 3; %mM
-K_6O2 = 0.02; %mM
+K_6E     = 3; %mM
+K_6O2   = 0.02; %mM
 K_6ISec = 0.5; %mM
 
 %R7 Cell growth on ethanol
@@ -45,49 +54,92 @@ g71=12; %mmol ATP/mmol E
 gamma71=0.025; %gX/mmol E, True biomass yield on ethanol in biosynthesis
 %Kinetics
 q7_max = 2; %mmol/gDW/h
-K_7E = 0.5; %mM
+K_7E   = 0.5; %mM
 K_7ATP = 0.5; %mM
 K_7ISec = 0.5; %mM
 
-%% funderingar
 
-
-%X, S_ec, E, O2, CO2, G, ATP, Pyr
-
-
-R1 = -S_ec*q1 + G*q1;
-R2 = -G*q2 - g21*ATP*q2 + gamma21*X*q2
-R3 = -G*q3 + 2*Pyr*q3 + 2*ATP*q3
-R4 = -3*O2*q4 - Pyr*q4 + 6*ATP*q4 + 3*CO2*q4
-R5 = -Pyr*q5 + CO2*q5 + E*q5
-R6 = -E*q6 - 4*O2*q6 + 2*CO2*q6 + 8*ATP*q6
-R7 = -E*q7 - g71*ATP*q7 + gamma71*X*q7
-
-
-S_ec = G
-G = -g21*ATP + gamma21*X
-%% A
 %S_ec, G,  ATP,       X, Pyr, CO2, O2,  E
- [-1, +1,    0,       0,   0,   0,  0,  0;
-   0, -1, -g21, gamma21,   0,   0,  0,  0;
-   0, -1,    2,       0,   2,   0,  0,  0;
-   0,  0,    6,       0,  -1,   3, -3,  0;
-   0,  0,    0,       0,  -1,   1,  0,  1;
-   0,  0,    8,       0,   0,   2, -4, -1;
-   0,  0, -g71, gamma71,   0,   0,  0, -1]
+%A=[-1, +1,    0,       0,   0,   0,  0,  0;
+%    0, -1, -g21, gamma21,   0,   0,  0,  0;
+%    0, -1,    2,       0,   2,   0,  0,  0;
+%    0,  0,    6,       0,  -1,   3, -3,  0;
+%    0,  0,    0,       0,  -1,   1,  0,  1;
+%    0,  0,    8,       0,   0,   2, -4, -1;
+%    0,  0, -g71, gamma71,   0,   0,  0, -1];
 
-%dS_ecdt = -q1
-%dGdt = q1-q2-q3
-%dATPdt = -g21*q2+2*q3+6*q4+8*q6-g71*q7
-%dXdt = gamma21*q2+gamma71*q7
-%dPyrdt = 2*q3-q4-q5
-%dCO2dt = 3*q4+q5+2*q6
-%dO2dt = -3*q4-4*q6
-%dEdt = q5-q6-q7
+A = [-1,       0,  0,  0,  0,  0,       0;   % S_ec       
+      1,      -1, -1,  0,  0,  0,       0;   % G    
+      0,    -g21,  2,  6,  0,  8,    -g71;   % ATP    
+      0, gamma21,  0,  0,  0,  0, gamma71;   % X    
+      0,       0,  2, -1, -1,  0,       0;   % Pyr    
+      0,       0,  0,  3,  1,  2,       0;   % CO2    
+      0,       0,  0, -3,  0, -4,       0;   % O2
+      0,       0,  0,  0,  1, -1,      -1];  % E
 
-%todo: change these
-starting_conditions = [Xi, Si, ci_o2, yo2_in, yco2_in];
+
+S_eci = 1000;         % mmol/L
+Gi = 0.1    ;         % mmol/L
+ATP_i = 1   ;         % mmol/L
+Pyr_i = 0.5 ;         % mmol/L
+Xi = 0.1    ;         % g/L
+V_l_i = 75  ;         % L
+V_g_i = 25  ;         % L
+kLa = 600   ;         % /h
+He = 0.790  ;         % atm*L/mmmol for oxygen
+yo2_in = 1000*(0.2095*100*60)/24.07;      % mmol/h
+yco2_in = 1000*(0.0005*100*60)/24.07;      %  mmol/h
+R = 8.206e-5;         % atm*L/(mmol*K)
+t = linspace(0, 100);  % cultivation period (h)
+Ei = 0;
+
+%Fin_l=
+%Fin_g=
+
+
+
+starting_conditions = [S_eci, Gi, ATP_i, Xi, Pyr_i, yco2_in, yo2_in, Ei];
     
-[t, y]=ode15s(@(t,y)B4_fun(t, y), t, starting_conditions);
-      
+[t,y] = ode15s(@(t,y) sim_fun(t,y), t, starting_conditions);
+    
+ S_ec  = y(:,1);
+ G     = y(:,2);
+ ATP   = y(:,3);
+ X     = y(:,4);
+ Pyr   = y(:,5);
+ CO2   = y(:,6);
+ cO2_L = y(:,7);
+ E     = y(:,8);
 
+subplot(3, 2, 1)    
+plot(t,S_ec)
+title("S_ec")
+legend("S_ec")
+
+
+subplot(3, 2, 2)    
+plot(t,X,t,G) 
+title("X and G")
+legend("X","G")
+
+subplot(3, 2, 3)    
+plot(t,ATP,t,Pyr)  
+title("ATP and Pyr")
+legend("ATP","Pyr")
+ylim([0 10]);
+
+
+subplot(3, 2, 4)    
+plot(t,cO2_L) 
+title("cO2_L")
+legend("cO2_L")
+
+subplot(3, 2, 5)    
+plot(t,CO2) 
+title("CO2")
+legend("CO2")
+
+subplot(3, 2, 6)    
+plot(t,E) 
+title("E")
+legend("E")
