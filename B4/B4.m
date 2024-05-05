@@ -12,7 +12,7 @@ global  Fin_l Fin_g V_g_i V_l_i ...
     V_l_i   = 0.5;             % initial liquid volume (L)
     V_g_i   = 9.5;             % initial gas volume (L)
     
-    Fin_l   = 0.02;             % liquid flow rate (L/h)
+    Fin_l   = 0.2;             % liquid flow rate (L/h)
     Fin_g   = 60;              % gas flow rate (L/h) 
 
     VL      = V_l_i+Fin_l*t;   % liquid volume, at time t (L) 

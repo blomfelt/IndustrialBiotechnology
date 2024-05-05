@@ -29,7 +29,7 @@ global Fin_l Fin_g V_g_i V_l_i ...
     dV_Gdt  = -Fin_l;                            % change in gas volume 
     dXdt    = -Fin_l/VL*X+mu*X;                  % change in biomass concentration
     dsdt    = Fin_l/VL*(S0-S)-Ysx*mu*X;          % change in substrate concentration 
-    dc_o2dt = q_o2*X+kLa*(yo2*P/He-c_o2);        % change in oxygen cocnentration in the liquid phase
+    dc_o2dt = q_o2*X+kLa*(yo2*P/He-c_o2);        % change in oxygen concentration in the liquid phase
     dyo2dt  = Fin_g/VG*(yo2_in-yo2*(1-yo2_in-yco2_in)/(1-yo2-yco2))-kLa*(yo2*P/He-c_o2)*VL*R*T/(VG*P);   %  change in mole fraction of oxygen  
     dyco2dt = Fin_g/VG*(yco2_in-yco2*(1-yo2_in-yco2_in)/(1-yo2-yco2))+q_co2*X*VL*R*T/(VG*P);             %  change in mole fraction of carbon dioxide
     dydt    = [dXdt; dsdt; dc_o2dt; dyo2dt; dyco2dt];
