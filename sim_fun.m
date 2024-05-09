@@ -36,12 +36,12 @@ global q1_max q2_max q3_max q4_max q5_max q6_max q7_max ...
     q_E     = (q5-q6-q7);
     
 
-    dS_ecdt     = -q1*X;                               
-    dGdt        = q_G*rho_c - my*G; 
-    dATPdt      = q_ATP*rho_c - my*ATP;  
-    dXdt        = my*X;  
-    dPyrdt      = q_Pyr*rho_c - my*Pyr; 
-    dcO2_Ldt    = q_O2*X + kLa*(yO2*P/He-cO2_L);        % change in oxygen cocnentration in the liquid phase
+    dS_ecdt     = -q1*X;
+    dGdt        = q_G*rho_c - my*G;
+    dATPdt      = q_ATP*rho_c - my*ATP;
+    dXdt        = my*X;
+    dPyrdt      = q_Pyr*rho_c - my*Pyr;
+    dcO2_Ldt    = q_O2*X + kLa*(yO2*P/He-cO2_L); % change in oxygen concentration in the liquid phase
     dyO2dt      = Q/VG*(yO2_in-yO2*(1-yO2_in-yCO2_in)/(1-yO2-yCO2))-kLa*(yO2*P/He-cO2_L)*VL*R*T/(VG*P);   %  change in mole fraction of oxygen  
     dyCO2dt     = Q/VG*(yCO2_in-yCO2*(1-yO2_in-yCO2_in)/(1-yO2-yCO2))+q_CO2*X*VL*R*T/(VG*P);             %  change in mole fraction of carbon dioxide
     dEdt        = q_E*X;  

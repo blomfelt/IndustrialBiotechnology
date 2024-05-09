@@ -32,15 +32,15 @@ yCO2_in = 0.0005;                   % initial mole fraction of CO2
 
 
 %Starting conditions
-S_ec_i  = 1000;                     % initial extracellular glucose concentration (mmol/L) 
+S_ec_i  = 1000;                     % initial extracellular glucose concentration (mM) 
 Gi      = 0.1;                      % initial intracellular glucose concentration (mM) 
 ATPi    = 1;                        % initial intracellular ATP concentration (mM)
 Pyri    = 0.5;                      % Initial intracellular pyruvate concentration (mM)
 Xi      = 0.1;                      % Initial biomass concentration (g/L)
 cO2_Li  = 100*P*yO2_in/He;          % Initial oxygen concentration in the liquid (mM)
-yO2i    = yO2_in;                   % Initial mole fraction of oxygen
-yCO2i   = yCO2_in;                  % Initial mole fraction of carbon dioxide
-Ei      = 0;                        % Initial ethanol concentration ()
+yO2i    = yO2_in;                   % Initial mole fraction of oxygen (1)
+yCO2i   = yCO2_in;                  % Initial mole fraction of carbon dioxide (1)
+Ei      = 0;                        % Initial ethanol concentration (mM)
 
 %% Kinetic parameters and rate equations
 %R1 Glucose uptake
@@ -113,7 +113,7 @@ subplot(3, 2, 2)
 plot(t,S_ec,'LineWidth',0.75) 
 title("Concentration of S_e_c")
 legend("extracellular glucose, S_e_c")
-ylabel('concentration [mmol/L]') 
+ylabel('concentration [mM]') 
 xlabel('time [h]')
 xlim(t_Plot)
 
@@ -129,7 +129,7 @@ subplot(3, 2, 4)
 plot(t,CO2_L,'LineWidth',0.75) 
 title("Concentration of CO_2_,_L")
 legend('carbon dioxide, CO_2_,_L')
-ylabel('enhet]') 
+ylabel('concentration [mM]') 
 xlabel('time [h]')
 xlim(t_Plot)
 
@@ -137,7 +137,7 @@ subplot(3, 2, 5)
 plot(t,E,'LineWidth',0.75)
 title("Concentration of E")
 legend("ethanol, E")
-ylabel('concentration enhet')
+ylabel('concentration [mM]')
 xlabel('time [h]')
 xlim(t_Plot)
 
@@ -145,6 +145,6 @@ subplot(3, 2, 6)
 plot(t,O2,'LineWidth',0.75) 
 title("Concentration of O_2")
 legend("oxygen, O_2")
-ylabel('concentration enhet') 
+ylabel('concentration [mM]') 
 xlabel('time [h]')
 xlim(t_Plot)
