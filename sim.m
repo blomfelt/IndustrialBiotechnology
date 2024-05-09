@@ -99,7 +99,8 @@ X      = y(:,4);
 Pyr    = y(:,5);
 CO2_L  = y(:,6);
 O2     = y(:,7);
-E      = y(:,8);
+CO2    = y(:,8);
+E      = y(:,9);
 
 subplot(3, 2, 1)    
 plot(t,X,t,G,'LineWidth',0.75)
