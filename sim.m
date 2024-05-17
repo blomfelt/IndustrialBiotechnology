@@ -19,8 +19,9 @@ rho_c   = 500;                      % cell density (g DW/(L cell))
 V_l_i   = 20000;             % initial liquid volume (L)
 V_g_i   = 80000;             % initial gas volume (L)
 
-%Fin_l   = 4000;             % liquid flow rate (L/h)
-Fin_l    = 0; % Start at zero
+
+Fin_l   = 4000;             % liquid flow rate (L/h)
+%Fin_l    = 0; % Start at zero
 
 %Fin_g   = 60;              % gas flow rate (L/h) 
 Vtot    = 100000;                      % total volume (L)
@@ -110,7 +111,8 @@ for k = 2:length(tspan)
     if y(k,1) < S_ec_i && y(k,11) > E_setpoint/2 % Turn on the PID control once glucose and ethanol has been produced
 %    if y(k,1) < S_ec_i % Turn on the PID control glucose has been consumed
 %    if 1
-    PID_active = 1; 
+
+%    PID_active = 1; 
     end
 
     % PID
@@ -122,7 +124,7 @@ for k = 2:length(tspan)
         %derivative = (E_error(k-1) - E_error(k)) / dt;  % calculate derivative
         u(k) = Kp * proportional;% + Ki * integral + Kd * derivative;  % Calculate the control signal
         Fin_l = Fin_l - u(k);             
-    else
+    %else
         Fin_l = 0;
     end
     
