@@ -9,15 +9,18 @@ global q1_max q2_max q3_max q4_max q5_max q6_max q7_max ...
        P R T He Fin_l Fin_g ... 
        yCO2_in yO2_in rho_c S_ec_i S_in u V_l_i V_g_i
 
-tmax    = 200;         % total hours
-tspan   = [0 tmax];    % cultivation period (h)
+tmax    = 100;         % total hours
+%tspan   = [0 tmax];    % cultivation period (h)
+dt      = 0.5;
+tspan   = 0:dt:tmax;
 
 rho_c   = 500;                      % cell density (g DW/(L cell)) 
 
 V_l_i   = 20000;             % initial liquid volume (L)
 V_g_i   = 80000;             % initial gas volume (L)
 
-Fin_l   = 4000;             % liquid flow rate (L/h)
+%Fin_l   = 4000;             % liquid flow rate (L/h)
+Fin_l    = 0; % Start at zero
 
 %Fin_g   = 60;              % gas flow rate (L/h) 
 Vtot    = 100000;                      % total volume (L)
@@ -84,44 +87,63 @@ K_7ISec = 0.5;                      % (mM)
 starting_conditions = [S_ec_i, Gi, ATPi, Xi, Pyri, cO2_Li, yO2i, yCO2i, V_l_i, V_g_i, Ei]; 
 
 % PID control parameters
-Kp = 0.025;
-Ki = 0.001;
-Kd = 0;  
+%Kp = 0.025;
+%Ki = 0.016;
+%Kd = 0.009;
+Kp = 0.15;
 
-integral = 0;
-previous_error = 0;
-dt = 0.5;
+E_setpoint = 5;     % setpoint ethanol concentration
 
+% Avoiding errors
 y = zeros(length(tspan), 11);
+E_error = zeros(length(tspan), 1);
 y(1, :) = starting_conditions;
+E_error(1) = E_setpoint;
+PID_active = 0;
+u=[];
 
-for k = 1:length(tspan)
-    
-    E_current = y(k, 11);                % current ethanol concentration
-    E_setpoint = 5;                       % setpoint ethanol concentration
-    E_error = E_setpoint - E_current;     % error
+for k = 2:length(tspan)
+    [t, y_out] = ode15s(@sim_fun, [tspan(k-1), tspan(k)], y(k-1, :));
+    y(k, :) = y_out(end, :);
+
+    % Turn on PID:
+    if y(k,1) < S_ec_i && y(k,11) > E_setpoint/2 % Turn on the PID control once glucose and ethanol has been produced
+%    if y(k,1) < S_ec_i % Turn on the PID control glucose has been consumed
+%    if 1
+    PID_active = 1; 
+    end
 
     % PID
-    integral = integral + E_error * dt;   % calculate integral
-    derivative = (E_error - previous_error) / dt;  % calculate derivative
-    u = Kp * E_error + Ki * integral + Kd * derivative;  % Calculate the control signal
+    if PID_active
+        E_error(k) = E_setpoint - y(k, 11); % error between setpoint and current ethanol concentration
 
-    if E_current>E_setpoint/2
-        Fin_l=0;
+        proportional = E_error(k); % calculate proportional
+        %integral = sum(E_error);   % calculate integral
+        %derivative = (E_error(k-1) - E_error(k)) / dt;  % calculate derivative
+        u(k) = Kp * proportional;% + Ki * integral + Kd * derivative;  % Calculate the control signal
+        Fin_l = Fin_l - u(k);             
     else
-    Fin_l= Fin_l + u;
+        Fin_l = 0;
     end
-    % Debugging
-  % disp('Fin_l:'); disp(Fin_l);
-  % disp('u:'); disp(u);
-
-    [t, y] = ode15s(@sim_fun, tspan, starting_conditions);
-
-    previous_error = E_error;
-
-end
-
     
+    if Fin_l<0
+        disp("Avoiding negative flow in")
+        Fin_l = 0;
+    end
+    if y(k, 9) > 75000
+        disp("Max volume reached")
+        y(k, 9) = 75000;
+        y(k, 10) = 25000;
+        Fin_l=0;
+        Fin_g=0;
+    end
+
+% Debugging
+  if k<20
+      disp('Fin_l:'); disp(Fin_l);
+      %disp('u:'); disp(u);
+  end
+end
 
 % Extract results
 S_ec   = y(:, 1);
@@ -136,9 +158,13 @@ VL     = y(:, 9);
 VG     = y(:, 10);
 E      = y(:, 11);
 
+
+
+
+t_plot = linspace(0, tmax, length(y));
 % Plotting results
 subplot(3, 2, 1)    
-plot(t, X, t, G, 'LineWidth', 0.75)
+plot(t_plot, X, t_plot, G, 'LineWidth', 0.75)
 title("Concentration of X and G")
 legend("biomass, X", "intracellular glucose, G")
 ylabel('concentration [g/L]')
@@ -146,7 +172,7 @@ xlabel('time [h]')
 xlim([0 tmax])
 
 subplot(3, 2, 2)    
-plot(t, S_ec, 'LineWidth', 0.75) 
+plot(t_plot, S_ec, 'LineWidth', 0.75) 
 title("Concentration of S_e_c")
 legend("extracellular glucose, S_e_c")
 ylabel('concentration [mmol/L]') 
@@ -154,7 +180,7 @@ xlabel('time [h]')
 xlim([0 tmax])
 
 subplot(3, 2, 3)    
-plot(t, ATP, t, Pyr, 'LineWidth', 0.75)  
+plot(t_plot, ATP, t_plot, Pyr, 'LineWidth', 0.75)  
 title("Concentration of ATP and Pyruvate")
 legend('intracellular ATP','intracellular pyruvate')
 ylabel('concentration [mM]') 
@@ -162,7 +188,7 @@ xlabel('time [h]')
 xlim([0 tmax])
 
 subplot(3, 2, 4)    
-plot(t, cO2_L * 10^3, 'LineWidth', 0.75) 
+plot(t_plot, cO2_L * 10^3, 'LineWidth', 0.75) 
 title("O_2_,_L")
 legend('O_2_,_L')
 ylabel('enhet]') 
@@ -170,7 +196,7 @@ xlabel('time [h]')
 xlim([0 tmax])
 
 subplot(3, 2, 5)    
-plot(t, E, 'LineWidth', 0.75)
+plot(t_plot, E, 'LineWidth', 0.75)
 title("Concentration of E")
 legend("ethanol, E")
 ylabel('concentration enhet')
@@ -179,11 +205,27 @@ xlim([0 tmax])
 
 
 subplot(3, 2, 6)    
-plot(t, yO2, t, yCO2) 
+plot(t_plot, yO2, t_plot, yCO2) 
 title(" O_2 and CO_2")
 legend("O_2","CO_2")
 ylabel('concentration enhet') 
 xlabel('time [h]')
 ylim([0 1])
 xlim([0 tmax])
+
+figure()
+subplot(2, 2, 1)
+plot(1:length(u), u)
+title("u")
+xlabel("Timepoint (not hour!)")
+
+subplot(2, 2, 2)
+plot(1:length(E_error), E_error)
+title("E error")
+xlabel("Timepoint (not hour!)")
+
+subplot(2, 2, 3)
+plot(1:length(VL), VL)
+title("VL")
+xlabel("Timepoint (not hour!)")
 

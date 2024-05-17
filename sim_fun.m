@@ -1,11 +1,11 @@
-function dydt = sim_fun2(t, y)
+function dydt = sim_fun(t, y)
     global q1_max q2_max q3_max q4_max q5_max q6_max q7_max ... 
            K_1Sec K_2G K_2ATP K_3G K_3ATP K_3IATP K_4Pyr ... 
            K_4O2 K_4ISec K_5Pyr K_6E K_6O2 K_6ISec K_7E K_7ATP K_7ISec ...
            gamma21 gamma71 g21 g71 Vtot... 
            kLa P R T He Q Fin_l Fin_g V_g_i V_l_i... 
-           yCO2_in yO2_in rho_c S_ec_i S_in u
-
+           yCO2_in yO2_in rho_c S_ec_i S_in u ...
+    
     % Extract state variables from y
     S_ec    = y(1);
     G       = y(2);
@@ -21,17 +21,10 @@ function dydt = sim_fun2(t, y)
 
    
     % Update VL and VG
-    VL = V_l_i + Fin_l * t;  % liquid volume (L)
-    VG = Vtot - VL;          % gas volume (L)
+    %VL = V_l_i + Fin_l * t;  % liquid volume (L)
+    %VG = Vtot - VL;          % gas volume (L)
     Fin_g = 60 * VL;             % gas flow rate (L/h)
     kLa = 250 + (75000 - VL) / 300;  % oxygen mass transfer coefficient (/h)
-
-    if VL>75000
-        VL=75000;
-        VG=25000;
-       Fin_l=0;
-        Fin_g=0;
-    end
 
     if cO2_L<0
         cO2_L=0;
@@ -56,14 +49,16 @@ function dydt = sim_fun2(t, y)
     q_E = (q5 - q6 - q7);
 
     % Debugging
-%  disp('Calculating dS_ecdt');
-%  disp(['Size of V_l_i: ', num2str(size(V_l_i))]);
-%  disp(['Size of Fin_l: ', num2str(size(Fin_l))]);
-%  disp(['Size of VL: ', num2str(size(VL))]);
-%  disp(['Size of S_in: ', num2str(size(S_in))]);
-%  disp(['Size of S_ec: ', num2str(size(S_ec))]);
-%  disp(['Size of q1: ', num2str(size(q1))]);
-%  disp(['Size of X: ', num2str(size(X))]);
+    if 0 %t<0.1
+        disp('Calculating dS_ecdt');
+        disp(['Size of V_l_i: ', num2str(size(V_l_i))]);
+        disp(['Size of Fin_l: ', num2str(size(Fin_l))]);
+        disp(['Size of VL: ', num2str(size(VL))]);
+        disp(['Size of S_in: ', num2str(size(S_in))]);
+        disp(['Size of S_ec: ', num2str(size(S_ec))]);
+        disp(['Size of q1: ', num2str(size(q1))]);
+        disp(['Size of X: ', num2str(size(X))]);
+    end
     
 
      % Differential equations
@@ -74,10 +69,10 @@ function dydt = sim_fun2(t, y)
     dPyrdt = q_Pyr * rho_c - my * Pyr; 
     dcO2_Ldt = q_O2 * X + kLa * (yO2 * P / He - cO2_L);        % change in oxygen concentration in the liquid phase
     dyO2dt = Fin_g / VG * (yO2_in - yO2 * (1 - yO2_in - yCO2_in) / (1 - yO2 - yCO2)) - kLa * (yO2 * P / He - cO2_L) * VL * R * T / (VG * P);   %  change in mole fraction of oxygen  
-    dyCO2dt = Fin_g / VG * (yCO2_in - yCO2 * (1 - yO2_in - yCO2_in) / (1 - yO2 - yCO2)) + q_CO2 * X * VL * R * T / (VG * P);             %  change in mole fraction of carbon dioxide
-    dEdt = q_E * X;  
-    dVLdt = Fin_l;
-    dVGdt = -Fin_l;
+    dyCO2dt = Fin_g / VG * (yCO2_in - yCO2 * (1 - yO2_in - yCO2_in) / (1 - yO2 - yCO2)) + q_CO2 * X * VL * R * T / (VG * P);             %  change in mole fraction of carbon dioxide 
+    dVLdt = Fin_l;%V_l_i + Fin_l * t;
+    dVGdt = -Fin_l;% Vtot - VL;
+    dEdt = q_E * X; 
 
     dydt = [dS_ecdt; dGdt; dATPdt; dXdt; dPyrdt; dcO2_Ldt; dyO2dt; dyCO2dt; dVLdt; dVGdt; dEdt];
 end
