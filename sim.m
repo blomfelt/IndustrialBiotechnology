@@ -23,7 +23,8 @@ V_g_i   = 80000;             % initial gas volume (L)
 Fin_l    = 0; % Start at zero
 
 %Fin_g   = 60;              % gas flow rate (L/h) 
-Vtot    = 100000;                      % total volume (L)
+Vtot    = 100000;           % total volume (L)
+VL_max  = 75000;            % maximum liquid volume (L)
 
 He      = 0.790;                    % henry's constant for oxygen, (atm*L/mmol) 
 P       = 1;                        % pressure (atm)
@@ -130,10 +131,10 @@ for k = 2:length(tspan)
         disp("Avoiding negative flow in")
         Fin_l = 0;
     end
-    if y(k, 9) > 75000
+    if y(k, 9) > VL_max 
         disp("Max volume reached")
-        y(k, 9) = 75000;
-        y(k, 10) = 25000;
+        y(k, 9) = VL_max;
+        y(k, 10) = Vtot-VL_max;
         Fin_l=0;
         Fin_g=0;
     end
